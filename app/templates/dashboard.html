@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>首頁儀表板 | 拉屎冠軍爭霸賽</title>
+    <style>
+        body {
+            font-family: 'Helvetica Neue', Arial, 'Microsoft JhengHei', sans-serif;
+            background-color: #fdfaf6;
+            color: #5d4037;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            background: #ffffff;
+            border: 3px solid #8d6e63;
+            border-radius: 20px;
+            padding: 30px;
+            width: 90%;
+            max-width: 380px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 26px;
+            color: #8d6e63;
+            margin-bottom: 5px;
+        }
+
+        .subtitle {
+            font-size: 13px;
+            color: #b0bec5;
+            margin-bottom: 25px;
+            letter-spacing: 1px;
+        }
+
+        .welcome {
+            font-size: 18px;
+            margin-bottom: 20px;
+        }
+
+        .streak-card {
+            background-color: #efebe9;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 25px;
+            border: 1px dashed #a1887f;
+        }
+
+        .streak-count {
+            font-size: 52px;
+            font-weight: 900;
+            color: #8d6e63;
+            margin: 10px 0;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: bold;
+        }
+
+        .status-done {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        .status-none {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+
+        .btn-action {
+            display: block;
+            background-color: #8d6e63;
+            color: #ffffff;
+            text-decoration: none;
+            padding: 16px;
+            border-radius: 30px;
+            font-size: 18px;
+            font-weight: bold;
+            box-shadow: 0 4px 10px rgba(141, 110, 99, 0.3);
+        }
+
+        .btn-disabled {
+            background-color: #cfd8dc;
+            color: #90a4ae;
+            pointer-events: none;
+            box-shadow: none;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <h1>💩 拉屎冠軍爭霸賽 🏆</h1>
+        <div class="subtitle">第一組：張子軍的恩情還不完</div>
+
+        <div class="welcome">歡迎回來，<b>{{ user_name }}</b> 選手！</div>
+
+        <div class="streak-card">
+            <p style="margin:0; font-size:14px; color:#707070;">🔥 目前連續通暢天數 🔥</p>
+            <div class="streak-count">{{ streak_days }} 天</div>
+
+            {% if today_recorded %}
+            <div class="status-badge status-done">✅ 今日已成功解鎖紀錄</div>
+            {% else %}
+            <div class="status-badge status-none">⚠️ 今日尚未有紀錄</div>
+            {% endif %}
+        </div>
+
+        {% if today_recorded %}
+        <a href="#" class="btn-action btn-disabled">今日進度已達成</a>
+        {% else %}
+        <a href="/record/new" class="btn-action">+ 快速排便紀錄</a>
+        {% endif %}
+    </div>
+
+</body>
+
+</html>
