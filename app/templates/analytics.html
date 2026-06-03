@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>個人戰力分析 | 拉屎冠軍爭霸賽</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: 'Microsoft JhengHei', sans-serif;
+            background-color: #fdfaf6;
+            color: #5d4037;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .container {
+            background: white;
+            border: 3px solid #8d6e63;
+            border-radius: 20px;
+            padding: 20px;
+            width: 90%;
+            max-width: 450px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            text-align: center;
+        }
+        h1 { font-size: 24px; color: #8d6e63; }
+        .chart-box { margin: 20px 0; min-height: 250px; }
+        .btn-back {
+            display: inline-block;
+            background-color: #8d6e63;
+            color: white;
+            text-decoration: none;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>📊 個人數據與戰力分析</h1>
+    <p>統計你的布里斯托大便分類比例</p>
+    
+    <div class="chart-box">
+        <canvas id="poopChart"></canvas>
+    </div>
+
+    <a href="/dashboard" class="btn-back">返回首頁儀表板</a>
+</div>
+
+<script>
+    // 頁面載入後自動用 fetch 抓取後端 JSON 資料
+    document.addEventListener('DOMContentLoaded', function () {
+        fetch('/api/analytics-data')
+            .then(response => response.json())
+            .then(resData => {
+                const ctx = document.getElementById('poopChart').getContext('2d');
+                
+                // 檢查有沒有數據，如果全是 0 就提示
+                const hasData = resData.data.some(val => val > 0);
+                if (!hasData) {
+                    ctx.font = "16px Microsoft JhengHei";
+                    ctx.fillStyle = "#90a4ae";
+                    ctx.textAlign = "center";
+                    ctx.fillText("目前尚無歷史歷史數據，快去拉屎紀錄吧！", 225, 125);
+                    return;
+                }
+
+                // 渲染 Chart.js 圓餅圖 (Pie Chart)
+                new Chart(ctx, {
+                    type: 'pie',
+                    data: {
+                        labels: resData.labels,
+                        datasets: [{
+                            data: resData.data,
+                            backgroundColor: [
+                                '#5c4033', '#8b5a2b', '#cd853f', '#4caf50', '#ffeb3b', '#ff9800', '#f44336'
+                            ],
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: { position: 'bottom' }
+                        }
+                    }
+                });
+            })
+            .catch(err => console.error("圖表渲染失敗，原因:", err)); // 報告書第5頁要求的除錯規範
+    });
+</script>
+
+</body>
+</html>
