@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>歷史紀錄清單 | 拉屎冠軍爭霸賽</title>
+    <style>
+        body {
+            font-family: 'Helvetica Neue', Arial, 'Microsoft JhengHei', sans-serif;
+            background-color: #fdfaf6;
+            color: #5d4037;
+            margin: 0;
+            padding: 20px 0;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+        }
+
+        .container {
+            background: #ffffff;
+            border: 3px solid #8d6e63;
+            border-radius: 20px;
+            padding: 25px;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+        }
+
+        h1 {
+            font-size: 24px;
+            color: #8d6e63;
+            margin-top: 0;
+            margin-bottom: 5px;
+            text-align: center;
+        }
+
+        .subtitle {
+            font-size: 13px;
+            color: #b0bec5;
+            margin-bottom: 20px;
+            text-align: center;
+            letter-spacing: 1px;
+        }
+
+        .record-card {
+            background-color: #fbe9e7;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 15px;
+            border: 1px solid #ffccbc;
+            position: relative;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .record-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .record-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+            font-weight: bold;
+            font-size: 14px;
+            color: #795548;
+        }
+
+        .record-time {
+            color: #a1887f;
+            font-size: 12px;
+        }
+
+        .record-body {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 8px;
+        }
+
+        .bristol-badge {
+            background-color: #8d6e63;
+            color: white;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+        }
+
+        .color-dot {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            border: 1px solid #d7ccc8;
+            display: inline-block;
+        }
+
+        .record-memo {
+            font-size: 13px;
+            color: #757575;
+            background: #ffffff;
+            padding: 8px 12px;
+            border-radius: 8px;
+            border: 1px solid #efebe9;
+            margin: 0;
+        }
+
+        .no-records {
+            text-align: center;
+            padding: 40px 20px;
+            color: #9e9e9e;
+            font-size: 15px;
+        }
+
+        .no-records-icon {
+            font-size: 48px;
+            margin-bottom: 10px;
+        }
+
+        .btn-back {
+            display: block;
+            background-color: #8d6e63;
+            color: #ffffff;
+            text-decoration: none;
+            padding: 12px;
+            border-radius: 30px;
+            font-size: 16px;
+            font-weight: bold;
+            text-align: center;
+            box-shadow: 0 4px 10px rgba(141, 110, 99, 0.3);
+            margin-top: 20px;
+            transition: background-color 0.2s;
+        }
+
+        .btn-back:hover {
+            background-color: #70554d;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <h1>📜 歷史排便紀錄 💩</h1>
+        <div class="subtitle">第一組：張子軍的恩情還不完</div>
+
+        {% if records %}
+            {% for r in records %}
+            <div class="record-card">
+                <div class="record-header">
+                    <span>📅 {{ r.record_date }}</span>
+                    <span class="record-time">⏰ {{ r.record_time }}</span>
+                </div>
+                <div class="record-body">
+                    <span class="bristol-badge">布里斯托類型: {{ r.bristol_type }} 型</span>
+                    <div style="display: flex; align-items: center; gap: 5px;">
+                        <span>顏色:</span>
+                        {% set color_map = {
+                            '咖啡色': '#8D6E63',
+                            '黃色': '#FFEE58',
+                            '綠色': '#66BB6A',
+                            '黑色': '#212121',
+                            '紅色': '#EF5350',
+                            '灰色': '#B0BEC5'
+                        } %}
+                        {% set bg_color = color_map.get(r.poop_color, '#8D6E63') %}
+                        <span class="color-dot" style="background-color: {{ bg_color }};" title="{{ r.poop_color }}"></span>
+                        <span>{{ r.poop_color }}</span>
+                    </div>
+                </div>
+                {% if r.memo %}
+                <p class="record-memo">📝 備註：{{ r.memo }}</p>
+                {% endif %}
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="no-records">
+                <div class="no-records-icon">📭</div>
+                <p>目前還沒有任何紀錄喔！</p>
+                <p style="font-size: 12px; color: #bdbdbd;">趕快去排便並新增第一筆吧！</p>
+            </div>
+        {% endif %}
+
+        <a href="/dashboard" class="btn-back">返回個人儀表板</a>
+    </div>
+
+</body>
+
+</html>
