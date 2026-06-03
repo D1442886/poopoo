@@ -1,0 +1,495 @@
+{% extends "base.html" %}
+
+{% block title %}首頁儀表板 | 拉屎冠軍爭霸賽{% endblock %}
+
+{% block extra_css %}
+<style>
+    .dashboard-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 30px;
+    }
+
+    @media (min-width: 900px) {
+        .dashboard-grid {
+            grid-template-columns: 1fr 2fr;
+        }
+    }
+
+    /* 儀表板卡片樣式 */
+    .dash-card {
+        background-color: var(--white);
+        border-radius: 24px;
+        padding: 30px;
+        box-shadow: var(--card-shadow);
+        border: 1px solid var(--accent-light);
+        transition: var(--transition-smooth);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .dash-card:hover {
+        box-shadow: var(--hover-shadow);
+        transform: translateY(-2px);
+    }
+
+    .card-title {
+        font-size: 18px;
+        font-weight: 800;
+        color: var(--primary-dark);
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        border-bottom: 2px solid var(--accent-light);
+        padding-bottom: 10px;
+    }
+
+    /* 個人狀態卡片 */
+    .user-welcome-card {
+        background: linear-gradient(135deg, var(--primary-dark), var(--primary));
+        color: var(--white);
+        border: none;
+    }
+
+    .user-welcome-card h1 {
+        font-size: 26px;
+        font-weight: 800;
+        margin-bottom: 8px;
+    }
+
+    .user-welcome-card p {
+        opacity: 0.9;
+        font-size: 14px;
+    }
+
+    .team-badge-card {
+        background-color: var(--accent-light);
+        border: 2px dashed var(--accent);
+    }
+
+    .team-badge-title {
+        font-weight: 800;
+        color: var(--primary-dark);
+        font-size: 15px;
+    }
+
+    .team-badge-name {
+        font-size: 22px;
+        font-weight: 800;
+        color: var(--primary-dark);
+        margin: 5px 0;
+    }
+
+    .team-badge-score {
+        font-size: 14px;
+        color: var(--primary-dark);
+        font-weight: 600;
+    }
+
+    /* Streak Card */
+    .streak-container {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        background-color: var(--bg-color);
+        border-radius: 16px;
+        padding: 16px 20px;
+        margin-bottom: 20px;
+    }
+
+    .streak-info {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .streak-label {
+        font-size: 13px;
+        color: var(--text-muted);
+        font-weight: 600;
+    }
+
+    .streak-value {
+        font-size: 32px;
+        font-weight: 800;
+        color: var(--primary-dark);
+    }
+
+    .streak-fire {
+        font-size: 40px;
+        animation: flamePulse 1.5s infinite alternate;
+    }
+
+    .status-badge {
+        display: inline-block;
+        padding: 6px 12px;
+        border-radius: 12px;
+        font-size: 12px;
+        font-weight: bold;
+        text-align: center;
+    }
+
+    .status-done {
+        background-color: #d8f3dc;
+        color: #1b4332;
+    }
+
+    .status-none {
+        background-color: #fde2e4;
+        color: #590d22;
+    }
+
+    /* 按鈕樣式 */
+    .btn-action {
+        display: block;
+        width: 100%;
+        background-color: var(--primary);
+        color: var(--white);
+        text-decoration: none;
+        padding: 16px;
+        border-radius: 16px;
+        font-size: 16px;
+        font-weight: 800;
+        text-align: center;
+        box-shadow: 0 6px 16px rgba(141, 110, 99, 0.15);
+        transition: var(--transition-smooth);
+    }
+
+    .btn-action:hover {
+        background-color: var(--primary-dark);
+        transform: translateY(-2px);
+        box-shadow: 0 10px 24px rgba(141, 110, 99, 0.25);
+    }
+
+    .btn-disabled {
+        background-color: #cfd8dc;
+        color: #90a4ae;
+        pointer-events: none;
+        box-shadow: none;
+    }
+
+    /* MVP 榮譽榜 */
+    .mvp-box {
+        background: linear-gradient(135deg, #fff3b0, #cae9ff);
+        border: 1px solid #ffd166;
+        border-radius: 16px;
+        padding: 16px;
+        margin-top: 20px;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+
+    .mvp-avatar {
+        font-size: 32px;
+    }
+
+    .mvp-details {
+        font-size: 13px;
+        color: var(--text-main);
+    }
+
+    .mvp-name {
+        font-weight: 800;
+        color: var(--primary-dark);
+        font-size: 15px;
+    }
+
+    /* 排行榜表格 */
+    .leaderboard-table {
+        width: 100%;
+        border-collapse: collapse;
+        text-align: left;
+    }
+
+    .leaderboard-table th {
+        color: var(--text-muted);
+        font-weight: 800;
+        font-size: 13px;
+        padding: 12px 16px;
+        border-bottom: 2px solid var(--accent-light);
+    }
+
+    .leaderboard-table td {
+        padding: 16px;
+        border-bottom: 1px solid var(--accent-light);
+        font-size: 14px;
+    }
+
+    .leaderboard-table tr:last-child td {
+        border-bottom: none;
+    }
+
+    .rank-num {
+        display: inline-flex;
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        align-items: center;
+        justify-content: center;
+        font-weight: 800;
+        font-size: 13px;
+    }
+
+    .rank-1 { background-color: #ffd700; color: #3e2723; }
+    .rank-2 { background-color: #c0c0c0; color: #3e2723; }
+    .rank-3 { background-color: #cd7f32; color: #fff; }
+    .rank-4 { background-color: var(--bg-color); color: var(--text-muted); }
+
+    .team-name {
+        font-weight: 800;
+        color: var(--primary-dark);
+    }
+
+    .team-desc {
+        font-size: 12px;
+        color: var(--text-muted);
+        margin-top: 4px;
+    }
+
+    .score-badge {
+        font-weight: 800;
+        color: var(--primary);
+        font-size: 15px;
+        background-color: var(--primary-light);
+        padding: 4px 8px;
+        border-radius: 8px;
+    }
+
+    /* 歷史清單 */
+    .log-table {
+        width: 100%;
+        border-collapse: collapse;
+        text-align: left;
+    }
+
+    .log-table th {
+        color: var(--text-muted);
+        font-weight: 800;
+        font-size: 13px;
+        padding: 12px 10px;
+        border-bottom: 2px solid var(--accent-light);
+    }
+
+    .log-table td {
+        padding: 14px 10px;
+        border-bottom: 1px solid var(--accent-light);
+        font-size: 13px;
+    }
+
+    .log-table tr:last-child td {
+        border-bottom: none;
+    }
+
+    .log-points {
+        font-weight: bold;
+        color: var(--success);
+    }
+
+    .log-bristol {
+        display: inline-block;
+        background-color: var(--bg-color);
+        padding: 2px 8px;
+        border-radius: 8px;
+        font-size: 12px;
+        font-weight: 600;
+    }
+
+    .color-dot {
+        display: inline-block;
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        margin-right: 4px;
+        vertical-align: middle;
+    }
+
+    .btn-delete {
+        background: none;
+        border: none;
+        color: var(--danger);
+        font-weight: bold;
+        cursor: pointer;
+        font-size: 12px;
+        padding: 4px 8px;
+        border-radius: 6px;
+        transition: var(--transition-smooth);
+    }
+
+    .btn-delete:hover {
+        background-color: #fde2e4;
+    }
+
+    @keyframes flamePulse {
+        from { transform: scale(1); filter: drop-shadow(0 0 2px rgba(255,183,3,0.5)); }
+        to { transform: scale(1.15); filter: drop-shadow(0 0 8px rgba(255,183,3,0.9)); }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-grid">
+    
+    <!-- 左側欄位：個人資訊、所屬戰隊、今日狀態 -->
+    <div style="display: flex; flex-direction: column; gap: 24px;">
+        
+        <!-- 個人歡迎卡 -->
+        <div class="dash-card user-welcome-card">
+            <h1>💩 哈囉，{{ user_name }}！</h1>
+            <p>歡迎登入排便太空艙，讓我們保持腸胃健康！</p>
+        </div>
+
+        <!-- 戰隊卡 -->
+        {% if user_team %}
+        <div class="dash-card team-badge-card">
+            <div class="team-badge-title">🛡️ 您所屬的陣營</div>
+            <div class="team-badge-name">{{ user_team.name }}</div>
+            <div class="team-badge-score">戰隊當前累積總積分： <span class="score-badge">{{ user_team.total_points }} 分</span></div>
+            <div style="font-size: 12px; color: var(--primary-dark); opacity: 0.8; margin-top: 10px;">
+                理念：{{ user_team.description }}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- 連續天數卡 -->
+        <div class="dash-card">
+            <div class="card-title">🔥 狀態與天數</div>
+            
+            <div class="streak-container">
+                <div class="streak-info">
+                    <span class="streak-label">連續通暢天數</span>
+                    <span class="streak-value">{{ streak_days }} 天</span>
+                </div>
+                <div class="streak-fire">🔥</div>
+            </div>
+
+            <div style="margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between;">
+                <span style="font-size: 13px; font-weight: 600; color: var(--text-main);">今日紀錄狀態：</span>
+                {% if today_recorded %}
+                    <span class="status-badge status-done">✅ 今日已成功解鎖</span>
+                {% else %}
+                    <span class="status-badge status-none">⚠️ 今日尚未登記</span>
+                {% endif %}
+            </div>
+
+            {% if today_recorded %}
+                <a href="#" class="btn-action btn-disabled">🎉 今日任務已達成</a>
+            {% else %}
+                <a href="/record/new" class="btn-action">＋ 登記今日排便</a>
+            {% endif %}
+        </div>
+
+        <!-- 本週 MVP 榮譽榜 -->
+        {% if mvp_user %}
+        <div class="mvp-box">
+            <div class="mvp-avatar">👑</div>
+            <div class="mvp-details">
+                <div class="mvp-name">全服貢獻 MVP</div>
+                <div>目前由 <b>{{ mvp_user.username }}</b> 領先！</div>
+                <div style="color: var(--primary); font-size:11px; margin-top:2px;">
+                    陣營：{{ mvp_user.team_name }} | 貢獻分數：{{ mvp_user.total_contrib }} 分
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+    </div>
+
+    <!-- 右側欄位：戰隊排行榜、個人排便紀錄清單 -->
+    <div style="display: flex; flex-direction: column; gap: 24px;">
+        
+        <!-- 戰隊排行榜 -->
+        <div class="dash-card">
+            <div class="card-title">🏆 戰隊總積分排行榜 (F-07)</div>
+            <table class="leaderboard-table">
+                <thead>
+                    <tr>
+                        <th style="width: 60px;">排名</th>
+                        <th>戰隊名稱</th>
+                        <th style="text-align: right; width: 120px;">戰隊總積分</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for team in team_leaderboard %}
+                    <tr>
+                        <td>
+                            <span class="rank-num rank-{{ loop.index }}">{{ loop.index }}</span>
+                        </td>
+                        <td>
+                            <span class="team-name">{{ team.name }}</span>
+                            <div class="team-desc">{{ team.description }}</div>
+                        </td>
+                        <td style="text-align: right;">
+                            <span class="score-badge">{{ team.total_points }}</span>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- 個人排便紀錄清單 -->
+        <div class="dash-card">
+            <div class="card-title">📜 個人排便歷史紀錄 (最近 10 筆)</div>
+            
+            {% if records %}
+            <table class="log-table">
+                <thead>
+                    <tr>
+                        <th>日期</th>
+                        <th>布里斯托類型</th>
+                        <th>顏色</th>
+                        <th>所獲積分</th>
+                        <th>備註</th>
+                        <th style="text-align: right; width: 60px;">操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for r in records %}
+                    <tr>
+                        <td style="font-weight: 600; color: var(--primary-dark);">{{ r.record_date }}</td>
+                        <td>
+                            <span class="log-bristol">類型 {{ r.bristol_type }}</span>
+                        </td>
+                        <td>
+                            {% if r.color == 'brown' %}
+                                <span class="color-dot" style="background-color: #5d4037;"></span> 褐色
+                            {% elif r.color == 'yellow' %}
+                                <span class="color-dot" style="background-color: #ffd166;"></span> 黃色
+                            {% elif r.color == 'green' %}
+                                <span class="color-dot" style="background-color: #4f772d;"></span> 綠色
+                            {% elif r.color == 'black' %}
+                                <span class="color-dot" style="background-color: #212529;"></span> 黑色 ⚠️
+                            {% elif r.color == 'red' %}
+                                <span class="color-dot" style="background-color: #e63946;"></span> 紅色 ⚠️
+                            {% elif r.color == 'pale' %}
+                                <span class="color-dot" style="background-color: #e9ecef; border: 1px solid #ced4da;"></span> 灰白 ⚠️
+                            {% endif %}
+                        </td>
+                        <td>
+                            <span class="log-points">+{{ r.points }} 分</span>
+                        </td>
+                        <td style="color: var(--text-muted); font-size: 12px; max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="{{ r.notes or '' }}">
+                            {{ r.notes or '-' }}
+                        </td>
+                        <td style="text-align: right;">
+                            <form action="{{ url_for('record.delete_record', record_id=r.id) }}" method="POST" onsubmit="return confirm('確定要刪除這筆紀錄嗎？戰隊總分將同步扣除喔！');">
+                                <button type="submit" class="btn-delete">刪除</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <div style="text-align: center; padding: 40px; color: var(--text-muted);">
+                <p style="font-size: 40px; margin-bottom: 10px;">📭</p>
+                <p>尚無任何紀錄，快去新增第一筆排便紀錄吧！</p>
+            </div>
+            {% endif %}
+        </div>
+
+    </div>
+
+</div>
+{% endblock %}
